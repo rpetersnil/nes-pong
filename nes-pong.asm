@@ -188,7 +188,7 @@ LoadBackground:
   LDY #$00
 .outerloop:
 .innerloop:
-  LDA (bgPointerLo), y  ; copy one background byte from address in pointer plus Y
+  LDA [bgPointerLo], y  ; copy one background byte from address in pointer plus Y
   STA PPU_DATA           ; this runs 256 * 4 times
   INY                 ; inside loop counter
   CPY #$00
@@ -209,13 +209,8 @@ LoadBackground:
   STA score2
   STA scorer
   STA numhits
-  LDA #$50
-  STA bally
-  LDA #$80
-  STA ballx
-  LDA #$02
-  STA ballspeedx
-  STA ballspeedy
+;; Set initial ball state
+  JSR SetInitialBallState
 ;; Set initial paddle positions
   JSR SetPaddleStartPositions
 ;; Initialize button states
@@ -807,6 +802,16 @@ CalcPressesAndReleases:
   RTS
 
 
+SetInitialBallState:
+  LDA #$50
+  STA bally
+  LDA #$80
+  STA ballx
+  LDA #$02
+  STA ballspeedx
+  STA ballspeedy
+  RTS
+
 SetPaddleStartPositions:
   LDA #$03
   STA paddlespeed
@@ -847,13 +852,8 @@ UpdateScore2:
   LDA #$01
   STA ballleft
 ScoringDone:
-;; Reset ball location and speed
-  LDA #$50
-  STA bally
-  LDA #$80
-  STA ballx
-  LDA #$02
-  STA ballspeedx
+;; Set initial ball state
+  JSR SetInitialBallState
 ;; Reset hit tracker
   LDA #$00
   STA numhits
