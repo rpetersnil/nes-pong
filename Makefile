@@ -2,7 +2,8 @@
 
 %: %.asm
 	nesasm $@.asm
-	python fns2nl.py $@.fns > $@.nes.0.nl
+#	# Create symboles for FCEUX emulator
+#	python fns2nl.py $@.fns > $@.nes.0.nl
 
 all: nes-pong
 
