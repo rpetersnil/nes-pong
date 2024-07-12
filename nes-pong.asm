@@ -1,9 +1,12 @@
+;;;;;;;;;;;;;;;;;;
+;; Memory bank config
   .inesprg 2   ; 2x 16KB PRG code
   .ineschr 1   ; 1x  8KB CHR data
   .inesmap 0   ; mapper 0 = NROM, no bank swapping
   .inesmir 1   ; background mirroring
-  
 
+;; Create a listing file for development
+  .list
 
 ;;;;;;;;;;;;;;;;;;
 ;; System constants
@@ -43,13 +46,13 @@ Right_Dir             = %00000001
 STATETITLE     = $00  ; displaying title screen
 STATEPLAYING   = $01  ; move paddles/ball, check for collisions
 STATEGAMEOVER  = $02  ; displaying game over screen
-  
+
 RIGHTWALL      = $F4  ; when ball reaches one of these, do something
 TOPWALL        = $20
 BOTTOMWALL     = $D8
 LEFTWALL       = $04
-  
-PADDLE1X       = $0F  ; horizontal position for paddles, doesnt move
+
+PADDLE1X       = $0F  ; left/right position for paddles, doesn't change
 PADDLE2X       = $E8
 
 MAXSCORE       = $05
@@ -70,7 +73,7 @@ BUTTON_RIGHT  = 1 << 0
 bgPointerLo  .rs 1   ; pointer variables are declared in RAM
 bgPointerHi  .rs 1   ; low byte first, high byte immediately after
 sound_ptr     .rs 2  ; sound engine pointer
-gamestate  .rs 1  
+gamestate  .rs 1
 ballx      .rs 1  ; ball horizontal position
 bally      .rs 1  ; ball vertical position
 ballup     .rs 1  ; 1 = ball moving up
@@ -79,7 +82,7 @@ ballleft   .rs 1  ; 1 = ball moving left
 ballright  .rs 1  ; 1 = ball moving right
 ballspeedx .rs 1  ; ball horizontal speed per frame
 ballspeedy .rs 1  ; ball vertical speed per frame
-paddlespeed .rs 1 ; ball horizontal speed per frame
+paddlespeed .rs 1 ; paddle speed per frame
 paddle1ytop    .rs 1  ; player 1 paddle top vertical position
 paddle1ybot    .rs 1  ; player 1 paddle bottom vertical position
 paddle2ytop    .rs 1  ; player 2 paddle top vertical position
@@ -97,9 +100,9 @@ score1              .rs 1  ; player 1 score, 0-15
 score2              .rs 1  ; player 2 score, 0-15
 scorer              .rs 1  ; # of player who just scored
 binary              .rs 1  ; binary representation of score, for conversion
-onesDigit           .rs 1  
-tensDigit           .rs 1  
-hundredsDigit       .rs 1  
+onesDigit           .rs 1
+tensDigit           .rs 1
+hundredsDigit       .rs 1
 drawScoreOffset     .rs 1
 sleeping            .rs 1 ; ensures the main program is run just once per frame
 
@@ -107,16 +110,16 @@ sleeping            .rs 1 ; ensures the main program is run just once per frame
 ;;;;;;;;;;;;;;;;;;
 ;----- first 8k bank of PRG-ROM
     .bank 0
-    .org $8000  ; We have two 16k PRG banks now.  We will stick our 
+    .org $8000  ; We have two 16k PRG banks now.  We will stick our
                 ; sound engine in the first one, which starts at $8000.
-    
+
     .include "sound_engine.asm"
 
-;----- second 8k bank of PRG-ROM    
+;----- second 8k bank of PRG-ROM
     .bank 1
     .org $A000
-    
-;----- third 8k bank of PRG-ROM    
+
+;----- third 8k bank of PRG-ROM
     .bank 2
     .org $C000
 
@@ -149,7 +152,7 @@ clrmem:
   STA $0200, x
   INX
   BNE clrmem
-   
+
 vblankwait2:      ; Second wait for vblank, PPU is ready after this
   BIT PPU_STATUS
   BPL vblankwait2
@@ -162,14 +165,14 @@ LoadPalettes:
   LDA #$00
   STA PPU_ADDRESS    ; write the low byte of $3F00 address
 
-  ; Write the palette data to the PPU 
+  ; Write the palette data to the PPU
   LDX #$00
 .loop:
   LDA PaletteData, x      ; load data from address (PaletteData + the value in x)
   STA PPU_DATA               ; write to PPU
-  INX                     
-  CPX #$20               
-  BNE .loop  
+  INX
+  CPX #$20
+  BNE .loop
 
 LoadBackground:
   LDA PPU_STATUS             ; read PPU status to reset the high/low latch
@@ -185,7 +188,7 @@ LoadBackground:
   LDY #$00
 .outerloop:
 .innerloop:
-  LDA [bgPointerLo], y  ; copy one background byte from address in pointer plus Y
+  LDA (bgPointerLo), y  ; copy one background byte from address in pointer plus Y
   STA PPU_DATA           ; this runs 256 * 4 times
   INY                 ; inside loop counter
   CPY #$00
@@ -237,36 +240,36 @@ Forever:
 .loop:
   lda sleeping
 ;; Wait for NMI to clear the sleeping flag and wake us up
-  bne .loop  
+  bne .loop
 ;; When NMI wakes us up, handle input, fill drawing buffer, etc and go back to sleep
 
-GameEngine:  
+GameEngine:
   LDA gamestate
   CMP #STATETITLE
   BEQ EngineTitle
-    
+
   LDA gamestate
   CMP #STATEGAMEOVER
   BEQ EngineGameOver
-  
+
   LDA gamestate
   CMP #STATEPLAYING
   BEQ EnginePlaying
-  
-GameEngineDone:  
+
+GameEngineDone:
 
 ;; set ball/paddle sprite positions
-  JSR UpdateSprites  
+  JSR UpdateSprites
 
-;; get the current button data 
-  JSR ReadControllers  
+;; get the current button data
+  JSR ReadControllers
 
   jmp Forever ; go back to sleep
 
 
 ;;;;;;;;;;;;;;;;;;
 ;; Audio IRQ
-IRQ: 
+IRQ:
   RTI
 
 
@@ -274,7 +277,7 @@ IRQ:
 ;; NMI handler
 NMI:
 ;; Save registers
-  PHA 
+  PHA
   TXA
   PHA
   TYA
@@ -299,26 +302,26 @@ NMI:
   STA PPU_SCROLL_REG
   sta PPU_SCROLL_REG
 
-;; 
+;;
 ;; all graphics updates are complete by here
-;; 
+;;
 
 ;; Run our sound engine after all drawing is done. This ensures it is run once per frame.
   JSR sound_play_frame
-  
+
 ;; Wake up the main program
   LDA #$00
-  STA sleeping            
+  STA sleeping
 
 ;; Restore registers
-  PLA     
+  PLA
   TAY
   PLA
   TAX
   PLA
   RTI
 
- 
+
 ;;;;;;;;;;;;;;;;;;
 ;; Game engine
 EngineTitle:
@@ -340,7 +343,7 @@ EngineTitle:
 EngineTitleEnd:
   JMP GameEngineDone
 
- 
+
 EngineGameOver:
 ;; If start button pressed, go to title
   LDA pressed_buttons1
@@ -352,7 +355,7 @@ EngineGameOver:
 EngineGameOverEnd:
   JMP GameEngineDone
 
- 
+
 EnginePlaying:
 
 MoveBallRight:
@@ -489,7 +492,7 @@ MovePaddleDown:
   CLC
   ADC paddlespeed
   STA paddle1ybot
-  
+
 MovePaddle1DownDone:
 
   LDA buttons2
@@ -508,7 +511,7 @@ MovePaddle1DownDone:
   CLC
   ADC paddlespeed
   STA paddle2ybot
-  
+
 MovePaddle2DownDone:
 CheckPaddleCollision:
   LDA ballleft
@@ -546,7 +549,7 @@ CheckPaddleCollision:
 CheckPaddle1CollisionDone:
 
   LDA ballright
-  BEQ CheckPaddle2CollisionDone 
+  BEQ CheckPaddle2CollisionDone
 
   LDA ballx
   CLC
@@ -588,7 +591,7 @@ CheckPaddle2CollisionDone:
   STA numhits
 .done:
   JMP GameEngineDone
- 
+
 
 ;;;;;;;;;;;;;;;;;;
 ;; Utility functions
@@ -602,7 +605,7 @@ UpdateSprites:
   STA $0202
   LDA ballx
   STA $0203
-  
+
 ;; Update paddle sprites
   LDA paddle1ytop
   STA $0204
@@ -612,7 +615,7 @@ UpdateSprites:
   STA $0206
   LDA #PADDLE1X
   STA $0207
- 
+
   LDA paddle1ybot
   STA $0208
   LDA #$87
@@ -621,7 +624,7 @@ UpdateSprites:
   STA $020A
   LDA #PADDLE1X
   STA $020B
- 
+
   LDA paddle2ytop
   STA $020C
   LDA #$87
@@ -630,7 +633,7 @@ UpdateSprites:
   STA $020E
   LDA #PADDLE2X
   STA $020F
- 
+
   LDA paddle2ybot
   STA $0210
   LDA #$87
@@ -639,7 +642,7 @@ UpdateSprites:
   STA $0212
   LDA #PADDLE2X
   STA $0213
- 
+
   RTS
 
 
@@ -684,8 +687,8 @@ DrawMessage:
   BNE .loop
 DrawTextEnd:
   RTS
-  
- 
+
+
 DrawStuff:
   JSR DrawScore
   JSR DrawTextMessage
@@ -727,8 +730,8 @@ DrawScoreMain:
   JMP DrawScoreLoop
 DrawScoreEnd:
   RTS
- 
- 
+
+
 BinaryToDecimal:
 HundredsLoop:
   LDA binary
@@ -843,7 +846,7 @@ UpdateScore2:
   STA ballright
   LDA #$01
   STA ballleft
-ScoringDone: 
+ScoringDone:
 ;; Reset ball location and speed
   LDA #$50
   STA bally
@@ -864,7 +867,7 @@ ScoringDone:
   JMP EOGDone
 EndGame:
   LDA #STATEGAMEOVER
-  STA gamestate 
+  STA gamestate
 EOGDone:
   RTS
 
@@ -989,7 +992,7 @@ PaletteData:
                  ; processor will jump to the label NMI:
   .dw RESET      ; when the processor first turns on or is reset, it will jump
                  ; to the label RESET:
-  .dw IRQ        ;external interrupt IRQ 
+  .dw IRQ        ;external interrupt IRQ
 
 
 ;;;;;;;;;;;;;;;;;;
