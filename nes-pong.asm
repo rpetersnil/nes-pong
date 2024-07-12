@@ -76,7 +76,7 @@ sound_ptr     .rs 2  ; sound engine pointer
 gamestate  .rs 1
 ballx      .rs 1  ; ball horizontal position
 bally      .rs 1  ; ball vertical position
-ballup     .rs 1  ; 1 = ball moving up
+ballup     .rs 1  ; 1 = ball moving up TODO: remove redundant up vs down symbols
 balldown   .rs 1  ; 1 = ball moving down
 ballleft   .rs 1  ; 1 = ball moving left
 ballright  .rs 1  ; 1 = ball moving right
@@ -84,7 +84,7 @@ ballspeedx .rs 1  ; ball horizontal speed per frame
 ballspeedy .rs 1  ; ball vertical speed per frame
 paddlespeed .rs 1 ; paddle speed per frame
 paddle1ytop    .rs 1  ; player 1 paddle top vertical position
-paddle1ybot    .rs 1  ; player 1 paddle bottom vertical position
+paddle1ybot    .rs 1  ; player 1 paddle bottom vertical position TODO: make this a relative length?
 paddle2ytop    .rs 1  ; player 2 paddle top vertical position
 paddle2ybot    .rs 1  ; player 2 paddle bottom vertical position
 numhits        .rs 1  ; number of hits since last score
@@ -99,7 +99,7 @@ pressed_buttons2    .rs 1
 score1              .rs 1  ; player 1 score, 0-15
 score2              .rs 1  ; player 2 score, 0-15
 scorer              .rs 1  ; # of player who just scored
-binary              .rs 1  ; binary representation of score, for conversion
+binaryScore         .rs 1  ; binary representation of score, for conversion
 onesDigit           .rs 1
 tensDigit           .rs 1
 hundredsDigit       .rs 1
@@ -711,7 +711,7 @@ DrawScore1:
   STA drawScoreOffset
   LDA score1
 DrawScoreMain:
-  STA binary
+  STA binaryScore
   JSR BinaryToDecimal
 
   LDA PPU_STATUS             ; read PPU status to reset the high/low latch
@@ -734,27 +734,27 @@ DrawScoreEnd:
 
 BinaryToDecimal:
 HundredsLoop:
-  LDA binary
+  LDA binaryScore
   CMP #100             ; compare binary to 100
   BCC TensLoop         ; if binary < 100, all done with hundreds digit
-  LDA binary
+  LDA binaryScore
   SEC
   SBC #100
-  STA binary           ; subtract 100, store whats left
+  STA binaryScore      ; subtract 100, store whats left
   INC hundredsDigit    ; increment the digital result
   JMP HundredsLoop     ; run the hundreds loop again
 TensLoop:
-  LDA binary
+  LDA binaryScore
   CMP #10              ; compare binary to 10
   BCC OnesLoop         ; if binary < 10, all done with hundreds digit
-  LDA binary
+  LDA binaryScore
   SEC
   SBC #10
-  STA binary           ; subtract 10, store whats left
+  STA binaryScore      ; subtract 10, store whats left
   INC tensDigit        ; increment the digital result
   JMP TensLoop         ; run the tens loop again
 OnesLoop:
-  LDA binary
+  LDA binaryScore
   STA onesDigit        ; result is already under 10, can copy directly to result
   RTS
 
