@@ -999,5 +999,5 @@ PaletteData:
 ;; CHR data
   .bank 4
   .org $0000
-  .incbin "mario.chr"
+  .incbin "nes-pong.chr"
 
