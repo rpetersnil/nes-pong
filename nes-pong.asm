@@ -728,27 +728,27 @@ DrawScore:
 
 
 BinaryToDecimal:
-HundredsLoop:
+.hundredsLoop:
   LDA binaryScore
   CMP #100             ; compare binary to 100
-  BCC TensLoop         ; if binary < 100, all done with hundreds digit
+  BCC .tensLoop         ; if binary < 100, all done with hundreds digit
   LDA binaryScore
   SEC
   SBC #100
   STA binaryScore      ; subtract 100, store whats left
   INC hundredsDigit    ; increment the digital result
-  JMP HundredsLoop     ; run the hundreds loop again
-TensLoop:
+  JMP .hundredsLoop     ; run the hundreds loop again
+.tensLoop:
   LDA binaryScore
   CMP #10              ; compare binary to 10
-  BCC OnesLoop         ; if binary < 10, all done with hundreds digit
+  BCC .onesLoop         ; if binary < 10, all done with hundreds digit
   LDA binaryScore
   SEC
   SBC #10
   STA binaryScore      ; subtract 10, store whats left
   INC tensDigit        ; increment the digital result
-  JMP TensLoop         ; run the tens loop again
-OnesLoop:
+  JMP .tensLoop         ; run the tens loop again
+.onesLoop:
   LDA binaryScore
   STA onesDigit        ; result is already under 10, can copy directly to result
   RTS
@@ -769,7 +769,7 @@ ReadControllers:
   STA JOYPAD_PORT
 ;; Set up loop counter
   LDX #$08
-ReadControllersLoop:
+.loop:
 ;; Read controller 1
   LDA JOYPAD_PORT1
   LSR A            ; bit0 -> Carry
@@ -779,7 +779,7 @@ ReadControllersLoop:
   LSR A            ; bit0 -> Carry
   ROL buttons2     ; bit0 <- Carry
   DEX
-  BNE ReadControllersLoop
+  BNE .loop
 ;; Calculate new presses and releases
   JSR CalcPressesAndReleases
   RTS
