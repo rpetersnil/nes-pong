@@ -1,0 +1,13 @@
+TO DO
+* Add pause/unpause functionality
+* Fix the collision detection
+* Improve the graphics
+* Replace the CHR file with one entirely my own
+* Add a splash screen
+* Improve the sound effects
+* Add A and B games (difficulty, with larger paddles)
+* Retest on a real NES
+* Make it fun to play for real (tweak speed, add English, etc.)
+* Share!
+
+DONE
