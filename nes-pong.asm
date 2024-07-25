@@ -230,11 +230,11 @@ LoadBackground:
   STA PPU_CTRL_REG2
 
 Forever:
-  inc sleeping
+  INC sleeping
 .loop:
-  lda sleeping
+  LDA sleeping
 ;; Wait for NMI to clear the sleeping flag and wake us up
-  bne .loop
+  BNE .loop
 ;; When NMI wakes us up, handle input, fill drawing buffer, etc and go back to sleep
 
 GameEngine:
@@ -253,7 +253,7 @@ GameEngineDone:
   JSR UpdateSprites
 ;; get the current button data
   JSR ReadControllers
-  jmp Forever ; go back to sleep
+  JMP Forever ; go back to sleep
 
 
 ;;;;;;;;;;;;;;;;;;
@@ -289,7 +289,7 @@ NMI:
   ; tell the PPU that we are not doing any scrolling at the end of NMI
   LDA #$00
   STA PPU_SCROLL_REG
-  sta PPU_SCROLL_REG
+  STA PPU_SCROLL_REG
 
 ;;
 ;; all graphics updates are complete by here
@@ -402,7 +402,7 @@ EnginePlaying:
   LDA #$00
   STA ballup         ;;bounce, ball now moving down
 ;; Play wall bounce sound
-  lda #$00
+  LDA #$00
   JSR sound_load
 .moveBallUpDone:
 
@@ -423,7 +423,7 @@ EnginePlaying:
   LDA #$01
   STA ballup         ;;bounce, ball now moving down
 ;; Play wall bounce sound
-  lda #$00
+  LDA #$00
   JSR sound_load
 .moveBallDownDone:
 
@@ -531,7 +531,7 @@ EnginePlaying:
   LDA #$00
   STA ballleft         ;;bounce, ball now moving right
 ;; Play paddle bounce sound
-  lda #$01
+  LDA #$01
   JSR sound_load
 .checkPaddle1CollisionDone:
 
@@ -562,15 +562,15 @@ EnginePlaying:
   ADC numhits
   STA numhits
 ;; Play paddle bounce sound
-  lda #$01
+  LDA #$01
   JSR sound_load
 .checkPaddle2CollisionDone:
 
 ;; Update ball speed if rally has gone on long enough
-  lda numhits
+  LDA numhits
   CMP #$04
   BCC .done
-  lda ballspeedx
+  LDA ballspeedx
   CLC
   ADC #$01
   STA ballspeedx
@@ -818,7 +818,7 @@ SetPaddleStartPositions:
 
 HandlePointScored:
 .playScoreSound:
-  lda #$02
+  LDA #$02
   JSR sound_load
 .checkScorer:
   LDA #02

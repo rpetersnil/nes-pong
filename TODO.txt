@@ -1,3 +1,6 @@
+IN PROGRESS
+* Clean up current code issues
+
 TO DO
 * Add pause/unpause functionality
 * Fix the collision detection
