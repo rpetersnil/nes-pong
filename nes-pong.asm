@@ -331,11 +331,11 @@ EngineTitle:
 ;; If start button pressed, go to playing
   LDA pressed_buttons1
   AND #BUTTON_START
-  BEQ EngineTitleEnd
+  BEQ .return
   LDA #STATEPLAYING
   STA gamestate
 
-EngineTitleEnd:
+.return:
   JMP GameEngineDone
 
 
@@ -343,11 +343,11 @@ EngineGameOver:
 ;; If start button pressed, go to title
   LDA pressed_buttons1
   AND #BUTTON_START
-  BEQ EngineGameOverEnd
+  BEQ .return
   LDA #STATETITLE
   STA gamestate
 
-EngineGameOverEnd:
+.return:
   JMP GameEngineDone
 
 
@@ -676,11 +676,11 @@ DrawMessage:
 .loop:
   LDA GameText, y
   CMP #$ff
-  BEQ DrawTextEnd
+  BEQ .return
   STA PPU_DATA
   INY
   BNE .loop
-DrawTextEnd:
+.return:
   RTS
 
 
@@ -691,21 +691,21 @@ DrawStuff:
 
 DrawScore:
   LDX #$02
-DrawScoreLoop:
+.loop:
   CPX #$00
-  BEQ DrawScoreEnd
+  BEQ .return
   CPX #$01
-  BEQ DrawScore1
-DrawScore2:
+  BEQ .drawScore1
+.drawScore2:
   LDA #$5C
   STA drawScoreOffset
   LDA score2
-  JMP DrawScoreMain
-DrawScore1:
+  JMP .drawScoreMain
+.drawScore1:
   LDA #$41
   STA drawScoreOffset
   LDA score1
-DrawScoreMain:
+.drawScoreMain:
   STA binaryScore
   JSR BinaryToDecimal
 
@@ -722,8 +722,8 @@ DrawScoreMain:
   LDA onesDigit
   STA PPU_DATA
   DEX
-  JMP DrawScoreLoop
-DrawScoreEnd:
+  JMP .loop
+.return:
   RTS
 
 
