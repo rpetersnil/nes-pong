@@ -164,7 +164,6 @@ LoadPalettes:
   STA PPU_ADDRESS    ; write the high byte of $3F00 address
   LDA #$00
   STA PPU_ADDRESS    ; write the low byte of $3F00 address
-
   ; Write the palette data to the PPU
   LDX #$00
 .loop:
@@ -242,23 +241,18 @@ GameEngine:
   LDA gamestate
   CMP #STATETITLE
   BEQ EngineTitle
-
   LDA gamestate
   CMP #STATEGAMEOVER
   BEQ EngineGameOver
-
   LDA gamestate
   CMP #STATEPLAYING
   BEQ EnginePlaying
 
 GameEngineDone:
-
 ;; set ball/paddle sprite positions
   JSR UpdateSprites
-
 ;; get the current button data
   JSR ReadControllers
-
   jmp Forever ; go back to sleep
 
 
@@ -353,9 +347,9 @@ EngineGameOver:
 
 EnginePlaying:
 
-MoveBallRight:
+.moveBallRight:
   LDA ballright
-  BEQ MoveBallRightDone
+  BEQ .moveBallRightDone
 
   LDA ballx
   CLC
@@ -364,17 +358,17 @@ MoveBallRight:
 
   LDA ballx
   CMP #RIGHTWALL
-  BCC MoveBallRightDone      ;;if ball x < right wall, still on screen, skip next section
+  BCC .moveBallRightDone      ;;if ball x < right wall, still on screen, skip next section
 
 ;; Give point to player 1, reset ball
   LDA #$01
   STA scorer
   JSR HandlePointScored
+.moveBallRightDone:
 
-MoveBallRightDone:
-MoveBallLeft:
+.moveBallLeft:
   LDA ballleft
-  BEQ MoveBallLeftDone   ;;if ballleft=0, skip this section
+  BEQ .moveBallLeftDone   ;;if ballleft=0, skip this section
 
   LDA ballx
   SEC
@@ -383,17 +377,17 @@ MoveBallLeft:
 
   LDA ballx
   CMP #LEFTWALL
-  BCS MoveBallLeftDone      ;;if ball x > left wall, still on screen, skip next section
+  BCS .moveBallLeftDone      ;;if ball x > left wall, still on screen, skip next section
 
 ;; Give point to player 2, reset ball
   LDA #$02
   STA scorer
   JSR HandlePointScored
+.moveBallLeftDone:
 
-MoveBallLeftDone:
-MoveBallUp:
+.moveBallUp:
   LDA ballup
-  BEQ MoveBallUpDone   ;;if ballup=0, skip this section
+  BEQ .moveBallUpDone   ;;if ballup=0, skip this section
 
   LDA bally
   SEC
@@ -402,7 +396,7 @@ MoveBallUp:
 
   LDA bally
   CMP #TOPWALL
-  BCS MoveBallUpDone      ;;if ball y > top wall, still on screen, skip next section
+  BCS .moveBallUpDone      ;;if ball y > top wall, still on screen, skip next section
   LDA #$01
   STA balldown
   LDA #$00
@@ -410,11 +404,11 @@ MoveBallUp:
 ;; Play wall bounce sound
   lda #$00
   JSR sound_load
+.moveBallUpDone:
 
-MoveBallUpDone:
-MoveBallDown:
+.moveBallDown:
   LDA balldown
-  BEQ MoveBallDownDone   ;;if ballup=0, skip this section
+  BEQ .moveBallDownDone   ;;if ballup=0, skip this section
 
   LDA bally
   CLC
@@ -423,7 +417,7 @@ MoveBallDown:
 
   LDA bally
   CMP #BOTTOMWALL
-  BCC MoveBallDownDone      ;;if ball y < bottom wall, still on screen, skip next section
+  BCC .moveBallDownDone      ;;if ball y < bottom wall, still on screen, skip next section
   LDA #$00
   STA balldown
   LDA #$01
@@ -431,16 +425,16 @@ MoveBallDown:
 ;; Play wall bounce sound
   lda #$00
   JSR sound_load
+.moveBallDownDone:
 
-MoveBallDownDone:
-MovePaddleUp:
+.movePaddleUp:
   LDA buttons1
   AND #Up_Dir
-  BEQ MovePaddle1UpDone   ; branch if button is NOT pressed (0)
+  BEQ .movePaddle1UpDone   ; branch if button is NOT pressed (0)
 
   LDA paddle1ytop
   CMP #TOPWALL
-  BCC MovePaddle1UpDone    ;;if paddletop y < top wall, too high, don't move
+  BCC .movePaddle1UpDone    ;;if paddletop y < top wall, too high, don't move
 
   LDA paddle1ytop
   SEC
@@ -450,15 +444,15 @@ MovePaddleUp:
   SEC
   SBC paddlespeed
   STA paddle1ybot
+.movePaddle1UpDone:
 
-MovePaddle1UpDone:
   LDA buttons2
   AND #Up_Dir
-  BEQ MovePaddle2UpDone   ; branch if button is NOT pressed (0)
+  BEQ .movePaddle2UpDone   ; branch if button is NOT pressed (0)
 
   LDA paddle2ytop
   CMP #TOPWALL
-  BCC MovePaddle2UpDone    ;;if paddletop y < top wall, too high, don't move
+  BCC .movePaddle2UpDone    ;;if paddletop y < top wall, too high, don't move
 
   LDA paddle2ytop
   SEC
@@ -468,16 +462,16 @@ MovePaddle1UpDone:
   SEC
   SBC paddlespeed
   STA paddle2ybot
+.movePaddle2UpDone:
 
-MovePaddle2UpDone:
-MovePaddleDown:
+.movePaddleDown:
   LDA buttons1
   AND #Down_Dir
-  BEQ MovePaddle1DownDone    ;;branch if button is NOT pressed (0)
+  BEQ .movePaddle1DownDone    ;;branch if button is NOT pressed (0)
 
   LDA paddle1ybot
   CMP #BOTTOMWALL
-  BCS MovePaddle1DownDone    ;;if paddlebottom y > bottom wall, too low, don't move
+  BCS .movePaddle1DownDone    ;;if paddlebottom y > bottom wall, too low, don't move
 
   LDA paddle1ytop
   CLC
@@ -487,16 +481,15 @@ MovePaddleDown:
   CLC
   ADC paddlespeed
   STA paddle1ybot
-
-MovePaddle1DownDone:
+.movePaddle1DownDone:
 
   LDA buttons2
   AND #Down_Dir
-  BEQ MovePaddle2DownDone   ;;branch if button is NOT pressed (0)
+  BEQ .movePaddle2DownDone   ;;branch if button is NOT pressed (0)
 
   LDA paddle2ybot
   CMP #BOTTOMWALL
-  BCS MovePaddle2DownDone    ;;if paddlebottom y > bottom wall, too low, don't move
+  BCS .movePaddle2DownDone    ;;if paddlebottom y > bottom wall, too low, don't move
 
   LDA paddle2ytop
   CLC
@@ -506,28 +499,28 @@ MovePaddle1DownDone:
   CLC
   ADC paddlespeed
   STA paddle2ybot
+.movePaddle2DownDone:
 
-MovePaddle2DownDone:
-CheckPaddleCollision:
+.checkPaddleCollision:
   LDA ballleft
-  BEQ CheckPaddle1CollisionDone
+  BEQ .checkPaddle1CollisionDone
 
 ;; Check for collision with paddle 1
   LDA ballx
   SEC
   SBC #$08
   CMP #PADDLE1X
-  BCS CheckPaddle1CollisionDone
+  BCS .checkPaddle1CollisionDone
 
   LDA bally
   CMP paddle1ytop
-  BCC CheckPaddle1CollisionDone
+  BCC .checkPaddle1CollisionDone
 
   LDA bally
   SEC
   SBC #$08
   CMP paddle1ybot
-  BCS CheckPaddle1CollisionDone
+  BCS .checkPaddle1CollisionDone
 
 
   LDA #$01
@@ -540,27 +533,26 @@ CheckPaddleCollision:
 ;; Play paddle bounce sound
   lda #$01
   JSR sound_load
-
-CheckPaddle1CollisionDone:
+.checkPaddle1CollisionDone:
 
   LDA ballright
-  BEQ CheckPaddle2CollisionDone
+  BEQ .checkPaddle2CollisionDone
 
   LDA ballx
   CLC
   ADC #$08
   CMP #PADDLE2X
-  BCC CheckPaddle2CollisionDone
+  BCC .checkPaddle2CollisionDone
 
   LDA bally
   CMP paddle2ytop
-  BCC CheckPaddle2CollisionDone
+  BCC .checkPaddle2CollisionDone
 
   LDA bally
   SEC
   SBC #$08
   CMP paddle2ybot
-  BCS CheckPaddle2CollisionDone
+  BCS .checkPaddle2CollisionDone
 
   LDA #$00
   STA ballright
@@ -572,8 +564,8 @@ CheckPaddle1CollisionDone:
 ;; Play paddle bounce sound
   lda #$01
   JSR sound_load
+.checkPaddle2CollisionDone:
 
-CheckPaddle2CollisionDone:
 ;; Update ball speed if rally has gone on long enough
   lda numhits
   CMP #$04
@@ -654,18 +646,18 @@ GameClearText:
 DrawTextMessage:
   LDA gamestate
   CMP #STATETITLE
-  BEQ DrawTitle
+  BEQ .drawTitle
   CMP #STATEPLAYING
-  BEQ ClearText
-DrawGameOver:
+  BEQ .clearText
+.drawGameOver:
   LDY #(GameOverText-GameText)
-  JMP DrawMessage
-DrawTitle:
+  JMP .drawMessage
+.drawTitle:
   LDY #(GameTitleText-GameText)
-  JMP DrawMessage
-ClearText:
+  JMP .drawMessage
+.clearText:
   LDY #(GameClearText-GameText)
-DrawMessage:
+.drawMessage:
   LDA PPU_STATUS
   LDA GameText, y
   INY
@@ -787,7 +779,7 @@ ReadControllers:
 
 CalcPressesAndReleases:
   LDX #$00
-.loop
+.loop:
   LDA buttons1, x
   EOR #$FF
   AND last_frame_buttons1, x
@@ -825,14 +817,14 @@ SetPaddleStartPositions:
 
 
 HandlePointScored:
-PlayScoreSound:
+.playScoreSound:
   lda #$02
   JSR sound_load
-CheckScorer:
+.checkScorer:
   LDA #02
   CMP scorer
-  BEQ UpdateScore2
-UpdateScore1:
+  BEQ .updateScore2
+.updateScore1:
   LDA score1
   CLC
   ADC #$01
@@ -841,8 +833,8 @@ UpdateScore1:
   STA ballleft
   LDA #$01
   STA ballright
-  JMP ScoringDone
-UpdateScore2:
+  JMP .scoringDone
+.updateScore2:
   LDA score2
   CLC
   ADC #$01
@@ -851,7 +843,7 @@ UpdateScore2:
   STA ballright
   LDA #$01
   STA ballleft
-ScoringDone:
+.scoringDone:
 ;; Set initial ball state
   JSR SetInitialBallState
 ;; Reset hit tracker
@@ -860,15 +852,15 @@ ScoringDone:
 ;; Handle end of game
   LDA #MAXSCORE
   CMP score1
-  BEQ EndGame
+  BEQ .endGame
   LDA #MAXSCORE
   CMP score2
-  BEQ EndGame
-  JMP EOGDone
-EndGame:
+  BEQ .endGame
+  JMP .eOGDone
+.endGame:
   LDA #STATEGAMEOVER
   STA gamestate
-EOGDone:
+.eOGDone:
   RTS
 
 
