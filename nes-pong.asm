@@ -32,15 +32,6 @@ JOYPAD_PORT           = $4016
 JOYPAD_PORT1          = $4016
 JOYPAD_PORT2          = $4017
 
-A_Button              = %10000000
-B_Button              = %01000000
-Select_Button         = %00100000
-Start_Button          = %00010000
-Up_Dir                = %00001000
-Down_Dir              = %00000100
-Left_Dir              = %00000010
-Right_Dir             = %00000001
-
 ;;;;;;;;;;;;;;;;;;
 ;; Game constants
 STATETITLE     = $00  ; displaying title screen
@@ -429,7 +420,7 @@ EnginePlaying:
 
 .movePaddleUp:
   LDA buttons1
-  AND #Up_Dir
+  AND #BUTTON_UP
   BEQ .movePaddle1UpDone   ; branch if button is NOT pressed (0)
 
   LDA paddle1ytop
@@ -447,7 +438,7 @@ EnginePlaying:
 .movePaddle1UpDone:
 
   LDA buttons2
-  AND #Up_Dir
+  AND #BUTTON_UP
   BEQ .movePaddle2UpDone   ; branch if button is NOT pressed (0)
 
   LDA paddle2ytop
@@ -466,7 +457,7 @@ EnginePlaying:
 
 .movePaddleDown:
   LDA buttons1
-  AND #Down_Dir
+  AND #BUTTON_DOWN
   BEQ .movePaddle1DownDone    ;;branch if button is NOT pressed (0)
 
   LDA paddle1ybot
@@ -484,7 +475,7 @@ EnginePlaying:
 .movePaddle1DownDone:
 
   LDA buttons2
-  AND #Down_Dir
+  AND #BUTTON_DOWN
   BEQ .movePaddle2DownDone   ;;branch if button is NOT pressed (0)
 
   LDA paddle2ybot
