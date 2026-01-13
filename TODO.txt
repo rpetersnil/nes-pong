@@ -3,6 +3,7 @@ IN PROGRESS
 
 TO DO
 * Add pause/unpause functionality
+* Fix top and bottom overlap detection
 * Fix the collision detection
 * Improve the graphics
 * Replace the CHR file with one entirely my own
