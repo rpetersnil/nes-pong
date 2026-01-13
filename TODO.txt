@@ -1,6 +1,9 @@
 IN PROGRESS
 * Clean up current code issues
 
+BUGS
+* If score is greater than max, game will not end. Check for equal or greater.
+
 TO DO
 * Add pause/unpause functionality
 * Fix top and bottom overlap detection

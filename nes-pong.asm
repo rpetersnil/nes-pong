@@ -711,6 +711,10 @@ DrawScore:
 
 
 BinaryToDecimal:
+  LDA #$00
+  STA hundredsDigit
+  STA tensDigit
+  STA onesDigit
 .hundredsLoop:
   LDA binaryScore
   CMP #100             ; compare binary to 100
